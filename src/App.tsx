@@ -179,10 +179,10 @@ const Scene = () => {
       <group ref={innerGroupRef} position={[0, -5, 0]}>
         {/* 🟢 颜色修正：主树体改成 #E60012 (中国红) */}
         <Ornaments mode={currentMode} char={currentChar} count={1500} color="#E60012" speed={0.05} isGold={true} radiusOffset={0} globalScale={0.18} />
-        {/* 🟢 颜色修正：点缀1改成 #FFD700 (金色) */}
+        {/* 🟢 颜色修正：点缀1改成 #FFD700 (金色)，数量 400 (保持黄色) */}
         <Ornaments mode={currentMode} char={currentChar} count={400} color="#FFD700" speed={0.08} radiusOffset={0.5} globalScale={0.15} angleOffset={0} />
-        {/* 🟢 颜色修正：点缀2原本是绿色，现在也改成金色或者暖橙色 #FFA500，去掉绿意 */}
-        <Ornaments mode={currentMode} char={currentChar} count={400} color="#FFA500" speed={0.07} radiusOffset={0.5} globalScale={0.15} angleOffset={Math.PI} />
+        {/* 🟢 颜色修正：点缀2原本是黄色/暖橙色，现在改成绿色 #228B22，数量 400 (黄球的三分之一改绿) */}
+        <Ornaments mode={currentMode} char={currentChar} count={400} color="#228B22" speed={0.07} radiusOffset={0.5} globalScale={0.15} angleOffset={Math.PI} />
       </group>
       <group ref={outerGroupRef} position={[0, -5, 0]}>
         <Foliage /> 
