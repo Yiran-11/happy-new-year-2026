@@ -10,11 +10,11 @@ import StickyNote from './StickyNote';
 // --- 全局配置常量 ---
 const TREE_HEIGHT = 16;
 const TREE_RADIUS = 6;
-// ✅ 检查通过：已增加“福”字
+// ✅ 五字祝福
 const CHAR_SEQUENCE = ['福','新', '年', '快', '乐']; 
 const CHAR_SCALE = 15; 
 
-// 治愈系文案 (保持你修改的内容)
+// 治愈系文案
 const INITIAL_WISHES = [
   "身体健康\n最重要啦^^",
   "冬天终将过去^^",
@@ -28,7 +28,7 @@ const INITIAL_WISHES = [
   "2025 卧槽！\n又活一年！\n牛逼老铁！"
 ];
 
-// --- 工具函数 (保持不变) ---
+// --- 工具函数 ---
 const generateCharParticles = (char: string, count: number): Float32Array => {
   const canvas = document.createElement('canvas'); const size = 128; canvas.width = size; canvas.height = size;
   const ctx = canvas.getContext('2d'); if (!ctx) return new Float32Array(count * 3);
@@ -78,7 +78,6 @@ const Foliage = () => {
         uniforms={{ 
           uTime: { value: 0 }, 
           uChaos: { value: 0 }, 
-          // 🟢 修改：背景微粒颜色从深绿改成深红，更符合新年气氛
           uColor1: { value: new THREE.Color('#330000') }, 
           uColor2: { value: new THREE.Color('#FFD700') } 
         }} 
@@ -137,8 +136,11 @@ const Scene = () => {
   const notesData = useMemo(() => {
     const count = INITIAL_WISHES.length; 
     return new Array(count).fill(0).map((_, i) => {
-      const yProgress = -0.3 + (1.3 * i) / (count - 1); 
+      // 🟢 修复计算逻辑：添加 clamp 防止浮点数溢出导致 NaN，确保标签位置永远有效
+      let yProgress = -0.3 + (1.3 * i) / (count - 1); 
+      yProgress = Math.max(-1, Math.min(1, yProgress)); // 强制限制在 -1 到 1 之间
       const phi = Math.acos(yProgress); 
+      
       return {
         id: i,
         anchorParams: {
@@ -176,21 +178,25 @@ const Scene = () => {
       <spotLight position={[10, 20, 10]} angle={0.5} intensity={50} castShadow color="#FFD700" />
       <Environment preset="city" />
       <HandCursor />
+      
+      {/* 内层：红金主树 + 绿黄点缀 */}
       <group ref={innerGroupRef} position={[0, -5, 0]}>
-        {/* 🟢 颜色修正：主树体改成 #E60012 (中国红) */}
         <Ornaments mode={currentMode} char={currentChar} count={1500} color="#E60012" speed={0.05} isGold={true} radiusOffset={0} globalScale={0.18} />
-        {/* 🟢 颜色修正：点缀1改成 #FFD700 (金色)，数量 400 (保持黄色) */}
         <Ornaments mode={currentMode} char={currentChar} count={400} color="#FFD700" speed={0.08} radiusOffset={0.5} globalScale={0.15} angleOffset={0} />
-        {/* 🟢 颜色修正：点缀2原本是黄色/暖橙色，现在改成绿色 #228B22，数量 400 (黄球的三分之一改绿) */}
-        <Ornaments mode={currentMode} char={currentChar} count={400} color="#228B22" speed={0.07} radiusOffset={0.5} globalScale={0.15} angleOffset={Math.PI} />
+        <Ornaments mode={currentMode} char={currentChar} count={200} color="#228B22" speed={0.07} radiusOffset={0.5} globalScale={0.15} angleOffset={Math.PI} />
+        <Ornaments mode={currentMode} char={currentChar} count={200} color="#FFFF00" speed={0.07} radiusOffset={0.5} globalScale={0.15} angleOffset={Math.PI + 0.5} />
       </group>
+      
+      {/* 外层：背景粒子 + 丝带 + 便签 */}
       <group ref={outerGroupRef} position={[0, -5, 0]}>
         <Foliage /> 
         <SpiralRibbon />
+        {/* 这里就是渲染便签的地方，数据修复后它们应该回来了 */}
         {notesData.map((note) => (
           <StickyNote key={note.id} {...note} />
         ))}
       </group>
+      
       <EffectComposer disableNormalPass>
         <Bloom luminanceThreshold={0.9} intensity={1.5} radius={0.5} mipmapBlur />
         <Vignette eskil={false} offset={0.1} darkness={1.1} />
@@ -218,7 +224,6 @@ const AudioPlayer = () => {
 
   return (
     <div className="absolute bottom-5 left-5 z-50">
-      {/* ⚠️ 确保你的 public 文件夹里真的有 gongxifacai.mp3 这个文件，名字不能错 */}
       <audio ref={audioRef} src="./gongxifacai.mp3" loop />
       <button 
         onClick={handleClick}
